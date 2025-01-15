@@ -1,0 +1,39 @@
+import pyproj
+from pyproj import Transformer
+
+# Pedir al usuario que ingrese los números EPSG 
+inProj_num = input("Ingrese el número EPSG del sistema de coordenadas de origen: ")
+outProj_num = input("Ingrese el número EPSG del sistema de coordenadas de destino: ")
+# Por ejemplo: 
+# EPSG WGS84 (Google Earth) = 4326
+# EPSG Magna-Sirgas Colombia West Zone = 3115
+# EPSG Magna-Sirgas Colombia Bogotá zone = 3116
+# EPSG Magna Sirgas Colombia Origen Nacional = 9377 
+
+# Crear los códigos EPSG completos
+inProj_str = "EPSG:" + inProj_num
+outProj_str = "EPSG:" + outProj_num
+
+# Crear objetos CRS con los códigos EPSG
+inProj = pyproj.CRS(inProj_str)
+outProj = pyproj.CRS(outProj_str)
+
+# Crear un objeto Transformer
+transformer = Transformer.from_crs(inProj, outProj)
+
+# Pedir al usuario que ingrese las coordenadas como un string
+coordenadas_str = input("Ingrese las coordenadas XY separadas con punto y coma, si hay mas de una pareja de coordenadas, separelas \ncon un espacio o con un salto de línea (ejemplo: X1;Y1 X2;Y2 X3;Y3) ")
+
+# Convertir el string en una lista de listas
+coordenadas = [tuple(map(float, coord.split(';'))) for coord in coordenadas_str.split(' ')]
+
+# Convertir todas las coordenadas y guardar los resultados
+converted_coordinates = []
+for lat, lon in coordenadas:
+    y, x = transformer.transform(lon, lat)
+    converted_coordinates.append((x, y))
+
+# Imprimir los resultados
+print(f"\nConversión de coordenadas [Este (X), Norte(Y)]: ")
+for x, y in converted_coordinates:
+    print(f"{x}, {y}")
